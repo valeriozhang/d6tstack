@@ -151,7 +151,7 @@ def pd_to_mysql(df, uri, table_name, if_exists='fail', tmpfile='mysql.csv', sep=
     return True
 
 @d6tcollect.collect
-def pd_to_mssql(df, uri, table_name, schema_name=None, if_exists='fail', tmpfile='mysql.csv'):
+def pd_to_mssql(df, uri, table_name, schema_name=None, if_exists='fail', tmpfile='mysql.csv', remotefile='mysql.csv'):
     """
     Load dataframe into a sql table using native postgres LOAD DATA LOCAL INFILE.
 
@@ -181,13 +181,23 @@ def pd_to_mssql(df, uri, table_name, schema_name=None, if_exists='fail', tmpfile
     df[:0].to_sql(table_name, sql_engine, if_exists=if_exists, index=False)
 
     logger = PrintLogger()
-    logger.send_log('creating ' + tmpfile, 'ok')
-    df.to_csv(tmpfile, na_rep='\\N', index=False)
-    logger.send_log('loading ' + tmpfile, 'ok')
-    if schema_name is not None:
-        table_name = '{}.{}'.format(schema_name,table_name)
-    sql_load = "BULK INSERT {} FROM '{}';".format(table_name, tmpfile)
-    sql_engine.execute(sql_load)
+
+    if remotefile == 'mysql.csv':
+        logger.send_log('creating ' + tmpfile, 'ok')
+        df.to_csv(tmpfile, na_rep='\\N', index=False)
+        logger.send_log('loading ' + tmpfile, 'ok')
+        if schema_name is not None:
+            table_name = '{}.{}'.format(schema_name,table_name)
+        sql_load = "BULK INSERT {} FROM '{}';".format(table_name, tmpfile)
+        sql_engine.execute(sql_load)
+    else: 
+        logger.send_log('creating ' + tmpfile, 'ok')
+        df.to_csv(tmpfile, na_rep='\\N', index=False)
+        logger.send_log('loading ' + tmpfile, 'ok')
+        if schema_name is not None:
+            table_name = '{}.{}'.format(schema_name,table_name)
+        sql_load = "BULK INSERT {} FROM '{}';".format(table_name, remotefile)
+        sql_engine.execute(sql_load)
 
     os.remove(tmpfile)
 
