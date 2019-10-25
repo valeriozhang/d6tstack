@@ -10,7 +10,7 @@ extras = {
 setup(
     name='d6tstackmod',
     version='1',
-    packages=['d6tstack'],
+    packages=['d6tstackmod'],
     url='https://github.com/valeriozhang/d6tstack/archive/1.tar.gz',
     license='MIT',
     author='DataBolt Team',
